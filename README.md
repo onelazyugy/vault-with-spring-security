@@ -1,0 +1,2 @@
+- running jar: java -jar vault-0.1.jar --filelocation=your credential file location in JSON format
+- intellij vm options: -Dfilelocation=/Users/viet/Desktop/credential.json -Dpassword=my password
