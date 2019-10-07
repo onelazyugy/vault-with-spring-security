@@ -1,5 +1,8 @@
 package com.vietle.vault;
 
+import com.vietle.vault.util.CryptoUtil;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
@@ -10,17 +13,34 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 @Configuration
 public class BasicAuthConfig extends WebSecurityConfigurerAdapter {
+    private String basicAuthUsername;
+    private String basicAuthPassword;
+    private String basicAuthPassphrase;
+
+    @Autowired
+    public BasicAuthConfig(@Value("${basic.auth.username}") String basicAuthUsername,
+                           @Value("${basic.auth.password}") String basicAuthPassword,
+                           @Value("${basic.auth.passphrase}") String basicAuthPassphrase) {
+        this.basicAuthUsername = basicAuthUsername; this.basicAuthPassword = basicAuthPassword; this.basicAuthPassphrase = basicAuthPassphrase;
+    }
+
+    /**
+     * take the encrypted basicAuthPassword and decrypt it using the basicAuthPassphrase and store in memory
+     * @param auth
+     * @throws Exception
+     */
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
         auth.inMemoryAuthentication()
-                .withUser("viet").password(passwordEncoder().encode("nam")).roles("USER");
+                .withUser(basicAuthUsername)
+                .password(passwordEncoder().encode(CryptoUtil.decryptString(basicAuthPassword, basicAuthPassphrase)))
+                .roles("USER");
 
     }
 
     // Secure the endpoints with HTTP Basic authentication
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-
         http
             .httpBasic()
             .and()

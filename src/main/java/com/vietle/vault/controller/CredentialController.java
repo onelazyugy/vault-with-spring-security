@@ -8,7 +8,13 @@ import com.vietle.vault.service.ICredential;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.web.bind.annotation.*;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 @RestController
 @RequestMapping(value = "/api")
@@ -84,5 +90,15 @@ public class CredentialController {
             serviceResponse = ServiceResponse.builder().isServiceSuccess(false).isOperationSuccess(false).message(ce.getMessage()).build();
         }
         return serviceResponse;
+    }
+
+    // logout/clear basic auth credential
+    @RequestMapping(value="/logout", method = RequestMethod.POST)
+    public String logout (HttpServletRequest request, HttpServletResponse response) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth != null){
+            new SecurityContextLogoutHandler().logout(request, response, auth);
+        }
+        return "successfully clear basic auth";
     }
 }
