@@ -1,2 +1,5 @@
-- running jar: java -jar vault-0.1.jar --filelocation=your credential file location in JSON format
+- basic auth with spring security 
+- ever wanted to keep all of your credentials locally so that you can retrieve them when you need locally? this app uses a file locally on your machine and write your credentials there using your password for encrypt/decrypt your credential
+- this app uses  a passphrase for basic auth
+- running jar: java -jar vault-0.1.jar --filelocation=your credential file location in JSON format --password=your password here for encrypt/decrypt of your credentials
 - intellij vm options: -Dfilelocation=your credential file location in JSON format -Dpassword=my password
