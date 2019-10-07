@@ -76,7 +76,13 @@ public class CredentialController {
 
     @PatchMapping(value = "/updateCredential/{id}")
     public ServiceResponse updateCredential(@RequestBody Credential credential, @PathVariable int id) {
-
-        return null;
+        ServiceResponse serviceResponse;
+        try {
+            serviceResponse = this.credential.updateCredential(credential, id);
+        } catch (CredentialException ce) {
+            LOG.error(ce.getMessage());
+            serviceResponse = ServiceResponse.builder().isServiceSuccess(false).isOperationSuccess(false).message(ce.getMessage()).build();
+        }
+        return serviceResponse;
     }
 }

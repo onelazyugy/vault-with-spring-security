@@ -130,7 +130,7 @@ public class CredentialImpl implements ICredential {
     }
 
     @Override
-    public ServiceResponse updateCredential(Credential credentials, int id) throws CredentialException {
+    public ServiceResponse updateCredential(Credential credential, int id) throws CredentialException {
         ServiceResponse serviceResponse;
         BufferedWriter writer;
         Path path = Paths.get(fileLocation);
@@ -140,7 +140,31 @@ public class CredentialImpl implements ICredential {
             Optional<Credential> opt = currentCredentials.stream().filter(c->c.getId() == id).findAny();
             if(opt.isPresent()) {
                 Credential credentialToUpdate = opt.get();
-
+                if(!StringUtils.isEmpty(credential.getPassword())) {
+                    String encryptedPassword = CryptoUtil.encryptString(credential.getPassword(), password);
+                    credentialToUpdate.setPassword(encryptedPassword);
+                }
+                if(!StringUtils.isEmpty(credential.getName())) {
+                    credentialToUpdate.setName(credential.getName());
+                }
+                if(!StringUtils.isEmpty(credential.getCategory())) {
+                    credentialToUpdate.setCategory(credential.getCategory());
+                }
+                if(!StringUtils.isEmpty(credential.getText())) {
+                    credentialToUpdate.setText(credential.getText());
+                }
+                if(!StringUtils.isEmpty(credential.getUsername())) {
+                    credentialToUpdate.setUsername(credential.getUsername());
+                }
+                int indexOfCredentialToUpdate = currentCredentials.indexOf(credentialToUpdate);
+                currentCredentials.set(indexOfCredentialToUpdate, credentialToUpdate);
+                writer = ServiceUtil.bufferedWriter(fileLocation);
+                writer.write(objectMapper.writeValueAsString(currentCredentials));
+                writer.close();
+                List<Credential> updatedItem = new ArrayList<>(1);
+                updatedItem.add(credential);
+                serviceResponse =  ServiceResponse.builder().isServiceSuccess(true).isOperationSuccess(true)
+                        .credentials(updatedItem).message("success").build();
             } else {
                 serviceResponse = ServiceResponse.builder().isServiceSuccess(false).isOperationSuccess(true)
                         .credentials(null).message("not able to find credential").build();
@@ -149,6 +173,6 @@ public class CredentialImpl implements ICredential {
             LOG.error(ioe.getMessage());
             throw new CredentialException(101, "error while deleting credential" + ioe.getMessage());
         }
-        return null;
+        return serviceResponse;
     }
 }
