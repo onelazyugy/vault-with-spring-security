@@ -18,9 +18,9 @@ public class BasicAuthConfig extends WebSecurityConfigurerAdapter {
     private String basicAuthPassphrase;
 
     @Autowired
-    public BasicAuthConfig(@Value("${basic.auth.username}") String basicAuthUsername,
-                           @Value("${basic.auth.password}") String basicAuthPassword,
-                           @Value("${basic.auth.passphrase}") String basicAuthPassphrase) {
+    public BasicAuthConfig(@Value("${basic.auth.basicAuthUsername}") String basicAuthUsername,
+                           @Value("${basic.auth.basisAuthPassword}") String basicAuthPassword,
+                           @Value("${basic.auth.basicAuthPassphrase}") String basicAuthPassphrase) {
         this.basicAuthUsername = basicAuthUsername; this.basicAuthPassword = basicAuthPassword; this.basicAuthPassphrase = basicAuthPassphrase;
     }
 

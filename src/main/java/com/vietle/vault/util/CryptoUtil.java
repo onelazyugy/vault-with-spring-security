@@ -9,15 +9,15 @@ public class CryptoUtil {
         return encoder.encode(password);
     }
 
-    public static String encryptString(String textToEncrypt, String password) {
+    public static String encryptString(String textToEncrypt, String credentialEncKey) {
         StrongTextEncryptor textEncryptor = new StrongTextEncryptor();
-        textEncryptor.setPassword(password);
+        textEncryptor.setPassword(credentialEncKey);
         return textEncryptor.encrypt(textToEncrypt);
     }
 
-    public static String decryptString(String textToDecrypt, String password) {
+    public static String decryptString(String textToDecrypt, String credentialEncKey) {
         StrongTextEncryptor textEncryptor = new StrongTextEncryptor();
-        textEncryptor.setPassword(password);
+        textEncryptor.setPassword(credentialEncKey);
         return textEncryptor.decrypt(textToDecrypt);
     }
 }

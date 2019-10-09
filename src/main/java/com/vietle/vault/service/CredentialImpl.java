@@ -8,6 +8,7 @@ import com.vietle.vault.util.CryptoUtil;
 import com.vietle.vault.util.ServiceUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -26,12 +27,13 @@ public class CredentialImpl implements ICredential {
     private static Logger LOG = LoggerFactory.getLogger(CredentialImpl.class);
 
     private String fileLocation;
-    private String password;
+    private String credentialEncKey;
     private ObjectMapper objectMapper;
 
-    public CredentialImpl(@Value("${filelocation}") String fileLocation, @Value("${password}") String password, ObjectMapper objectMapper) {
+    @Autowired
+    public CredentialImpl(@Value("${filelocation}") String fileLocation, @Value("${credentialEncKey}") String credentialEncKey, ObjectMapper objectMapper) {
         this.fileLocation = fileLocation;
-        this.password = password;
+        this.credentialEncKey = credentialEncKey;
         this.objectMapper = objectMapper;
     }
 
@@ -43,7 +45,7 @@ public class CredentialImpl implements ICredential {
             String content = StringUtils.isEmpty(new String(Files.readAllBytes(path))) ? "{}" : new String(Files.readAllBytes(path));
             List<Credential> credentials = Arrays.asList(objectMapper.readValue(content, Credential[].class));
             credentials.stream().forEach(c->{
-                String decryptedText = CryptoUtil.decryptString(c.getPassword(), password);
+                String decryptedText = CryptoUtil.decryptString(c.getPassword(), credentialEncKey);
                 c.setPassword(decryptedText);
             });
             serviceResponse = ServiceResponse.builder().message("success").isOperationSuccess(true)
@@ -64,7 +66,7 @@ public class CredentialImpl implements ICredential {
             List<Credential> currentCredentials = Arrays.asList(objectMapper.readValue(content, Credential[].class));
             List<Credential> filteredResult =  currentCredentials.stream().filter(l->l.getName().contains(searchString)).collect(Collectors.toList());
             filteredResult.stream().forEach(c->{
-                String decryptedText = CryptoUtil.decryptString(c.getPassword(), password);
+                String decryptedText = CryptoUtil.decryptString(c.getPassword(), credentialEncKey);
                 c.setPassword(decryptedText);
             });
             filteredResult.sort(Comparator.comparing(Credential::getId));
@@ -84,7 +86,7 @@ public class CredentialImpl implements ICredential {
         Path path = Paths.get(fileLocation);
         try {
             credentials.stream().forEach(c->{
-                String encryptedString = CryptoUtil.encryptString(c.getPassword(), password);
+                String encryptedString = CryptoUtil.encryptString(c.getPassword(), credentialEncKey);
                 c.setPassword(encryptedString);
             });
             String content = new String(Files.readAllBytes(path));
@@ -141,7 +143,7 @@ public class CredentialImpl implements ICredential {
             if(opt.isPresent()) {
                 Credential credentialToUpdate = opt.get();
                 if(!StringUtils.isEmpty(credential.getPassword())) {
-                    String encryptedPassword = CryptoUtil.encryptString(credential.getPassword(), password);
+                    String encryptedPassword = CryptoUtil.encryptString(credential.getPassword(), credentialEncKey);
                     credentialToUpdate.setPassword(encryptedPassword);
                 }
                 if(!StringUtils.isEmpty(credential.getName())) {
